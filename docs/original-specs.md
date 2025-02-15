@@ -1985,243 +1985,229 @@ By centralizing configuration management using dspy, our system is more secure, 
 
 ---
 
+Below is the updated **Setup.md** file. This version is more comprehensive and includes details on the complete project structure, including separate files for routes, agents, and other modules that require content. Each file is described with its purpose and includes a placeholder section where developers can add or update content.
+
+---
+
 # Setup.md
 
 This document provides instructions for setting up the Omega-AGI FastAPI project on a development machine or server. It covers the project structure, environment configuration, dependency installation, and steps to run the application. Following these steps will ensure you have all the required components in place to start the system.
 
 ## Project Structure
+
 The project files are organized as follows (directory names and files):
+
 ```
 OmegaAGI/
 ├── app/
-│   ├── main.py               # FastAPI application instance and route definitions
-│   ├── agent.py              # Implementation of the OmegaAgent class (agent logic)
-│   ├── model_provider.py     # Functions/classes to integrate with LLM APIs (OpenAI, etc.)
-│   ├── db.py                 # Database (Supabase) client setup and logging functions
-│   ├── models.py             # Pydantic data models for requests and responses (OmegaRequest, OmegaResponse)
-│   └── ... (other modules if any, e.g., utils or config)
-├── docs/
-│   ├── README.md
-│   ├── Technical_Specs.md
-│   ├── Endpoints.md
-│   ├── Data_Specs.md
-│   ├── Omega_Specs.md
-│   ├── Agent_Coordination.md
-│   ├── Implementation_Plan.md
-│   └── Setup.md
-├── tests/
-│   └── ... (test files for different components)
-├── requirements.txt          # Python dependencies list (if using pip for installation)
-├── setup.sh                  # Convenience script to set up environment (optional usage)
-└── .env.example              # Example environment configuration file (to be copied to .env)
+│   ├── main.py               # FastAPI application instance and route definitions.
+│   ├── agent.py              # Implementation of the OmegaAgent class (agent logic).
+│   ├── model_provider.py     # Functions/classes to integrate with LLM APIs (OpenAI, etc.).
+│   ├── db.py                 # Database (Supabase) client setup and logging functions.
+│   ├── models.py             # Pydantic data models for requests and responses (OmegaRequest, OmegaResponse, etc.).
+│   ├── routes/               # Directory containing separate route files for modularity.
+│   │   ├── omega_routes.py       # Routes for Omega execution, validation, correction, reflection, improvement.
+│   │   ├── human_to_omega_routes.py  # Routes for human-to-Omega conversion endpoints.
+│   │   ├── omega_to_human_routes.py  # Routes for converting Omega to human language.
+│   │   ├── reasoning_routes.py       # Routes for reasoning endpoint.
+│   │   ├── agent_routes.py           # Routes for agent processing.
+│   │   └── logs_routes.py            # (Optional) Route for retrieving logs.
+│   └── config.py             # Configuration loader (uses dspy to load .env).
+├── plan/                    # Folder for implementation plans and related documents.
+│   └── Implementation_Plan.md  # High-level implementation plan (also in docs if desired).
+├── tests/                   # Test files for different components.
+│   └── (placeholder for test files)
+├── requirements.txt         # Python dependencies list.
+├── setup.sh                 # Convenience script to set up the environment.
+└── .env.example             # Example environment configuration file (to be copied to .env).
 ```
 
-A brief description of key components:
-- **app/main.py**: Constructs the FastAPI `app`, includes routes for `/health`, `/api/v1/omega`, etc., and ties together the agent and model.
-- **app/agent.py**: Contains the `OmegaAgent` class which handles parsing the Omega prompt and orchestrating calls to the LLM.
-- **app/model_provider.py**: Abstracts the calls to external AI models (like OpenAI). If multiple providers are supported, it will have logic to route to the correct API.
-- **app/db.py**: Manages the Supabase connection for logging. Initializes the Supabase client and provides a function to insert logs into the `query_logs` table.
-- **app/models.py**: Pydantic models used by FastAPI for validation and documentation.
-- **docs/**: Contains all project documentation in Markdown format. This is useful for quick reference and also to publish if needed.
-- **tests/**: (If provided) would contain automated tests. These tests can be run with `pytest` to verify that the system behaves as expected. (Writing tests is encouraged, though not fully detailed here).
-- **setup.sh**: A script to automate environment setup. You can use it to create a virtual environment, install dependencies, and prepare configuration files.
+### Description of Key Components
+
+- **app/main.py:**  
+  Constructs the FastAPI application instance, mounts route modules (from `app/routes/`), and ties together agents, models, and the database.
+
+- **app/agent.py:**  
+  Contains the `OmegaAgent` class, which handles parsing the Omega prompt, validating its structure, and orchestrating calls to LLMs for processing, reflection, and correction.
+
+- **app/model_provider.py:**  
+  Abstracts the LLM calls (e.g., OpenAI, Google Gemini) into functions such as:
+  - `call_translator_llm_human_to_omega()`
+  - `call_translator_llm_omega_to_human()`
+  - `call_translator_llm_correction()`
+  - `call_reflection_llm()`
+  
+  Each function includes detailed instructions and pseudocode.
+
+- **app/db.py:**  
+  Sets up the Supabase client and defines functions (e.g., `log_interaction()`) for logging requests and responses.
+
+- **app/models.py:**  
+  Contains all the Pydantic models for request and response validation. Models include OmegaRequest, OmegaResponse, HumanToOmegaRequest, OmegaValidationRequest, etc.
+
+- **app/routes/:**  
+  This folder holds separate route files to keep code modular and best practice size:
+  - **omega_routes.py:** Handles endpoints for `/api/v1/omega` (execution, validation, correction, reflection, and improvement).
+  - **human_to_omega_routes.py:** Contains endpoints for human-to-Omega conversion (LLM-based and parser-based).
+  - **omega_to_human_routes.py:** Contains the endpoint for translating Omega to human language.
+  - **reasoning_routes.py:** Contains the reasoning endpoint.
+  - **agent_routes.py:** Contains the endpoint to process Omega through specific agents.
+  - **logs_routes.py:** (Optional) Contains the logs retrieval endpoint for admin usage.
+
+- **app/config.py:**  
+  Loads configuration settings using dspy from a `.env` file. This centralizes API keys and configuration values.
+
+- **plan/:**  
+  Contains planning documents. For example, the Implementation_Plan.md outlines the full development plan, milestones, and tasks.
+
+- **tests/:**  
+  Placeholder folder for unit and integration tests.
+
+- **requirements.txt:**  
+  Lists all Python package dependencies (e.g., fastapi, uvicorn, openai, supabase-python, python-dotenv).
+
+- **setup.sh:**  
+  A shell script to automate environment setup (detailed below).
+
+- **.env.example:**  
+  A template file for environment configuration. Copy this to `.env` and update with actual values.
+
+---
 
 ## Environment Configuration
-The application requires certain configuration values, typically provided via environment variables. These include:
-- `OPENAI_API_KEY` – Your OpenAI API key for LLM access.
-- `SUPABASE_URL` – The URL of your Supabase project (found in the Supabase settings, usually of the form `https://xxxx.supabase.co`).
-- `SUPABASE_SERVICE_KEY` – The service role API key for your Supabase project. This key has insert/read access to the database (treat it like a secret).
-- `SUPABASE_ANON_KEY` – (Not strictly needed if using service key on backend) The anon public key (used only if you plan to call from a browser or if RLS policies allow inserts with it).
-- `DEFAULT_MODEL` – (optional) Default model identifier to use if none is specified in requests (e.g., "openai-gpt4").
-- `MODEL_PROVIDER` – (optional) Model provider name, e.g., "openai" or "google". This could toggle which API to use.
-- Other provider-specific keys if integrated (e.g., `GOOGLE_API_KEY` if Google model integration is added).
 
-You should create a `.env` file at the project root (same level as `setup.sh`) with these variables. An example `.env` template is provided as `.env.example`. For instance:
+The application requires configuration values provided via environment variables. These include:
+
+- `OPENAI_API_KEY` – Your OpenAI API key for LLM access.
+- `SUPABASE_URL` – The URL of your Supabase project.
+- `SUPABASE_SERVICE_KEY` – The service role API key for your Supabase project.
+- `DEFAULT_MODEL` – (optional) Default model identifier (e.g., "openai-gpt4").
+- `MODEL_PROVIDER` – (optional) The model provider name (e.g., "openai" or "google").
+- `ADMIN_TOKEN` – (optional) Token for admin endpoints (e.g., logs retrieval).
+- `MAX_CORRECTION_ATTEMPTS` – (optional) Maximum allowed correction iterations (e.g., 3).
+
+Create a `.env` file at the project root (copy from `.env.example`) with these variables. For example:
+
 ```bash
 OPENAI_API_KEY=your-openai-key-here
 SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_SERVICE_KEY=your-supabase-service-key
 DEFAULT_MODEL=openai-gpt4
 MODEL_PROVIDER=openai
+ADMIN_TOKEN=change-this-for-production
+MAX_CORRECTION_ATTEMPTS=3
 ```
-Do not commit your actual `.env` file to version control, as it contains secrets. The application (via Pydantic or manual os.getenv calls) will load these at startup.
 
-If you use the `setup.sh` script, it will prompt or place a template for `.env` as well.
+Do not commit your actual `.env` file to version control.
+
+---
 
 ## Dependency Installation
-Make sure you have **Python 3.9+** installed. Then proceed with the following steps:
 
-1. **Virtual Environment**: (Optional but recommended) Create a virtual environment to isolate dependencies:
+1. **Create Virtual Environment:**
+
    ```bash
    python3 -m venv venv
    source venv/bin/activate   # On Windows, use: venv\Scripts\activate
    ```
-   This will activate a clean environment for the project.
 
-2. **Install Python packages**: Use pip to install required packages. If a `requirements.txt` is provided, run:
+2. **Install Dependencies:**
+
+   With `requirements.txt` in place, run:
+
    ```bash
    pip install -r requirements.txt
    ```
-   If not, you can manually install the main ones:
+
+   Alternatively, manually install:
+
    ```bash
-   pip install fastapi uvicorn[standard] openai supabase-python python-dotenv
+   pip install fastapi uvicorn[standard] openai supabase-python python-dotenv pydantic
    ```
-   - `fastapi` for the web framework.
-   - `uvicorn[standard]` as the ASGI server.
-   - `openai` for OpenAI API integration.
-   - `supabase-python` (the official Supabase client) for database operations.
-   - `python-dotenv` if you want to automatically load environment variables from .env (you'll have to call dotenv.load_dotenv at app start).
-   - You might also install `pydantic`, but it comes with FastAPI.
-   - For testing: `pytest` if you plan to run tests.
-   - For linting/formatting: `flake8`, `black` (optional).
 
-   Ensure all installations complete without errors. 
-
-3. **Supabase Setup**: 
-   - If you haven't already, create a Supabase project via their website.
-   - In the SQL editor or the Table editor, create the table defined in **Data_Specs.md** (`query_logs`). You can run the SQL snippet provided or use the UI to add columns:
-     - id (bigserial, primary key)
-     - prompt (text)
-     - response (text)
-     - model (varchar(50))
-     - created_at (timestamp, default now())
-   - Retrieve your project URL and service_role key from Supabase settings.
-   - Set those in your .env as above.
-   - (If you prefer not to use Supabase, you can skip this, but logging will not function. The API will still work without it. Alternatively, adjust the code to log to a file or another DB.)
-
-## Running the Application
-With dependencies installed and environment configured, you're ready to run the server:
-
-1. **Activate environment** (if not already): `source venv/bin/activate`.
-
-2. **Start the FastAPI server**:
-   ```bash
-   uvicorn app.main:app --reload
-   ```
-   Explanation:
-   - `app.main:app` points Uvicorn to the `app` object in `app/main.py`.
-   - `--reload` makes the server auto-restart if you change code (useful in development; omit in production for performance).
-
-3. Upon starting, you should see Uvicorn logs indicating the server is running on `http://127.0.0.1:8000` (or similar).
-
-4. **Test the server**:
-   - Open a browser and go to `http://localhost:8000/health`. You should see a simple status response (e.g., `{"status":"ok"}`).
-   - Go to `http://localhost:8000/docs` to view the interactive API documentation (Swagger UI). You should see the endpoints and be able to test them.
-   - Try a test query on `/api/v1/omega` using the "Try it out" feature or via curl:
-     ```bash
-     curl -X POST "http://localhost:8000/api/v1/omega" \
-          -H "Content-Type: application/json" \
-          -d '{"omega": "DEFINE_SYMBOLS{Q=\"Question\" /*What is 2+2?*/}; → AGI_Rpt WR_SECT(Q, d=\"Compute the result.\");"}'
-     ```
-     The response should be a JSON with an answer, e.g., `{"result": "The result of 2+2 is 4."}` (the exact wording may vary).
-   - If you get a response, the pipeline (API -> agent -> OpenAI -> back) is functioning.
-
-5. **Using Different Models**:
-   - By default, if you didn't specify, it uses whatever `DEFAULT_MODEL` is set to (e.g., "openai-gpt4"). You can override by including `"model": "openai-gpt3.5"` in the JSON to use GPT-3.5, etc.
-   - If you integrated other providers or models, test those similarly by specifying the appropriate model name in the request.
-   - Note: ensure the OPENAI_API_KEY has access to the model you request (some accounts might not have GPT-4 access, etc.).
-
-6. **Logs**:
-   - If Supabase logging is enabled and configured, after each request you should see an entry in the `query_logs` table. You can verify by querying the table:
-     ```sql
-     select * from query_logs order by id desc limit 5;
-     ```
-     (via Supabase SQL editor or any Postgres client with the connection).
-   - If logs are not appearing, check the console where Uvicorn is running for errors related to Supabase. Make sure the URL and keys are correct.
-
-7. **Shutting down**:
-   - Simply press Ctrl+C in the terminal where Uvicorn is running to stop the server.
-   - Deactivate the virtual environment with `deactivate` if you want to exit it.
-
-## Using setup.sh (Automated Setup)
-The `setup.sh` script is provided to automate some of the steps above. You can open and inspect it before running. It typically does:
-- Create a Python virtual environment (`venv` directory).
-- Activate it and install required packages via pip.
-- Create a `.env` file (from `.env.example` or by echoing needed vars).
-- Provide final instructions to run the server.
-
-To use it:
-```bash
-chmod +x setup.sh   # make sure it's executable
-./setup.sh
-```
-Follow any prompts it gives. After it completes, the environment should be ready.
-
-Remember to fill in the actual values in the `.env` file for API keys after the script sets up placeholders.
-
-## Project Maintenance
-- **Updating Dependencies**: If you need to update a package, modify `requirements.txt` (or the pip install command) and reinstall. Keep an eye on FastAPI and OpenAI SDK versions for compatibility.
-- **Running Tests**: If tests are added (in `tests/`), run them with `pytest`. Make sure to set environment variables for tests (you can use a `.env.test` or similar, or in CI set dummy keys).
-- **Common Issues**:
-  - If the server doesn't start, check for syntax errors or import errors in the console output.
-  - If you get import errors like "module not found" for `app.something`, ensure your working directory is the project root when running uvicorn. Uvicorn should be called from project root so that `app` package is found.
-  - CORs: By default, FastAPI allows all origins for docs but if you're calling from a browser app on another domain, you might need to add CORs middleware. This isn't configured by default here, but can be added in `main.py` if needed.
-  - Supabase issues: If insert queries fail, ensure the service role key is used and RLS is disabled or policies allow insertion. For initial dev, simplest is to disable RLS on `query_logs` table or use service key (which bypasses RLS).
-  - Omega format issues: If the LLM isn't following the Omega instructions well, you may need to refine the system prompt or provide examples. Check the Omega_Specs for guidelines and adjust `agent.py` prompting logic accordingly.
-
-By following this setup guide, you should have a running instance of the Omega-AGI system to experiment with. From here, you can write your own Omega prompts and use the API to get structured AI outputs, or even build a front-end or integration on top of this API.
-
-Happy coding!
+   Additional packages (e.g., pytest, flake8, black) may be installed as needed.
 
 ---
 
-# setup.sh
-```bash
-#!/usr/bin/env bash
-# This script sets up the Omega-AGI project environment and installs dependencies.
+## Supabase Setup
 
-# 1. Create project directories (if not already present)
-echo "Setting up project directories..."
-mkdir -p app docs tests
+- Create a Supabase project via [Supabase](https://supabase.com/).
+- Use the SQL editor to create the `query_logs` table with columns:
+  - `id` (bigserial, primary key)
+  - `prompt` (text)
+  - `response` (text)
+  - `model` (varchar(50))
+  - `created_at` (timestamp, default now())
+- Retrieve the Supabase URL and service key, and set them in your `.env`.
 
-# 2. Python virtual environment
-ENV_DIR="venv"
-if [ ! -d "$ENV_DIR" ]; then
-    echo "Creating Python virtual environment in ./$ENV_DIR"
-    python3 -m venv $ENV_DIR
-fi
+---
 
-echo "Activating virtual environment..."
-# shellcheck disable=SC1091
-source "$ENV_DIR/bin/activate"
+## Running the Application
 
-# 3. Upgrade pip
-echo "Upgrading pip..."
-pip install --upgrade pip
+1. **Activate the Virtual Environment:**
 
-# 4. Install required packages
-echo "Installing required Python packages..."
-pip install fastapi uvicorn[standard] openai supabase-python python-dotenv
+   ```bash
+   source venv/bin/activate
+   ```
 
-# 5. Create .env file with placeholders (if not exists)
-ENV_FILE=".env"
-if [ -f "$ENV_FILE" ]; then
-    echo ".env already exists. Skipping creation of .env."
-else 
-    echo "Creating .env file with example configuration..."
-    cat > $ENV_FILE <<EOL
-# Omega-AGI Environment Configuration
+2. **Start the Server:**
 
-# API Keys and URLs (replace placeholders with your actual values)
-OPENAI_API_KEY=replace-with-your-openai-api-key
-SUPABASE_URL=replace-with-your-supabase-url (e.g., https://xyzcompany.supabase.co)
-SUPABASE_SERVICE_KEY=replace-with-your-supabase-service-role-key
+   ```bash
+   uvicorn app.main:app --reload
+   ```
 
-# Default model settings
-MODEL_PROVIDER=openai
-DEFAULT_MODEL=openai-gpt4
+3. **Test the Application:**
 
-# (Add any additional configuration as needed)
-EOL
-fi
+   - Visit `http://localhost:8000/health` to confirm the server is running.
+   - Go to `http://localhost:8000/docs` for the interactive API documentation.
+   - Test endpoints using curl or via the Swagger UI.
 
-# 6. Provide final instructions
-echo "---------------------------------------------------------"
-echo "Setup complete! 🎉"
-echo "1. Review and update the .env file with your actual API keys and settings."
-echo "2. To activate the virtual environment, run 'source $ENV_DIR/bin/activate'."
-echo "3. Start the server with: uvicorn app.main:app --reload"
-echo "4. Visit http://localhost:8000/docs to test the API."
-echo "---------------------------------------------------------"
-```
+---
+
+## Placeholders and Modular Files
+
+Each file that requires content (such as route files and agent files) includes placeholders where you can expand functionality:
+
+- **app/main.py:**  
+  Should import and mount routes from the `app/routes/` folder.
+
+- **app/routes/omega_routes.py:**  
+  Should contain routes for `/api/v1/omega` and related endpoints (validation, correction, reflection, improvement). Place a placeholder comment like `# TODO: Implement Omega execution logic`.
+
+- **app/routes/human_to_omega_routes.py:**  
+  Contains endpoints for human-to-omega conversion. Include placeholders.
+
+- **app/routes/omega_to_human_routes.py:**  
+  Contains the endpoint for translating Omega to human language.
+
+- **app/routes/reasoning_routes.py:**  
+  Contains the reasoning endpoint.
+
+- **app/routes/agent_routes.py:**  
+  Contains endpoints to process Omega via specific agents.
+
+- **app/routes/logs_routes.py:**  
+  (Optional) Contains the logs retrieval endpoint.
+
+- **app/agent.py, app/model_provider.py, app/db.py, app/models.py:**  
+  Each file includes basic implementations with comments and placeholders where further logic can be added.
+
+---
+
+## Project Maintenance
+
+- **Updating Dependencies:**  
+  Modify `requirements.txt` and reinstall as needed.
+
+- **Running Tests:**  
+  Use `pytest` for test cases placed under the `tests/` directory.
+
+- **Common Issues:**  
+  - Ensure you run uvicorn from the project root so that the `app` package is found.
+  - Update the `.env` file with actual credentials.
+  - If the server doesn't start, check for syntax or import errors in the terminal.
+
+By following this setup guide, you should have a fully working instance of the Omega-AGI system. The structure supports modular development, making it easier to manage separate endpoints and agent logic as the project evolves.
+
+Happy coding!
 

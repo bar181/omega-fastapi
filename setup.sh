@@ -1,8 +1,3 @@
-Below is the updated, comprehensive `setup.sh` script. It creates all required folders (excluding `/docs` since those are already populated), sets up essential files with placeholders, generates a `requirements.txt` and a `.env.example` file, and provides final instructions.
-
----
-
-```bash
 #!/usr/bin/env bash
 # setup.sh
 # This script sets up the Omega-AGI project environment by creating necessary folders,
@@ -65,7 +60,7 @@ class OmegaAgent:
         self.max_correction_attempts = int(settings.MAX_CORRECTION_ATTEMPTS or 3)
     
     def validate_script(self):
-        # Basic validation: Check for mandatory sections.
+        # Basic validation: ensure required sections exist.
         if "DEFINE_SYMBOLS" not in self.omega_script:
             raise OmegaValidationError("Missing DEFINE_SYMBOLS block.")
         if "WR_SECT" not in self.omega_script:
@@ -135,7 +130,6 @@ if [ ! -f "app/db.py" ]; then
 from supabase import create_client
 from app.config import settings
 
-# Initialize Supabase client using environment variables.
 supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_SERVICE_KEY)
 
 async def log_interaction(prompt: str, response: str, model: str):
@@ -187,8 +181,7 @@ class OmegaImproveRequest(BaseModel):
 EOF
 fi
 
-# 2.6 app/routes files (placeholders)
-
+# 2.6 Create route files in app/routes with placeholders
 ROUTE_FILES=("omega_routes.py" "human_to_omega_routes.py" "omega_to_human_routes.py" "reasoning_routes.py" "agent_routes.py" "logs_routes.py")
 
 for file in "${ROUTE_FILES[@]}"; do
@@ -199,7 +192,7 @@ from fastapi import APIRouter
 
 router = APIRouter()
 
-# TODO: Implement routes in this file.
+# TODO: Implement routes for $(echo $file | sed 's/_routes\.py//')
 EOF
   fi
 done
@@ -265,25 +258,3 @@ echo "2. Activate the virtual environment with: source venv/bin/activate"
 echo "3. Start the server with: uvicorn app.main:app --reload"
 echo "4. Visit http://localhost:8000/health and http://localhost:8000/docs to test the API."
 echo "---------------------------------------------------------"
-```
-
----
-
-### Explanation
-
-- **Directories:**  
-  The script creates `app`, `app/routes`, `tests`, and `plan` folders. The `/docs` folder is omitted.
-  
-- **Files in `app/`:**  
-  Essential files (`main.py`, `agent.py`, `model_provider.py`, `db.py`, `models.py`, `config.py`) are created with placeholder code and comments.
-  
-- **Routes:**  
-  In `app/routes/`, multiple route files are created for modular organization, each with a placeholder comment indicating that route logic should be added.
-  
-- **requirements.txt & .env.example:**  
-  Both files are created if they do not already exist.
-
-- **Final Instructions:**  
-  The script prints instructions on how to activate the virtual environment and start the server.
-
-This setup script provides a comprehensive starting point for the Omega-AGI project while following best practices for modularity and maintainability.
